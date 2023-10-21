@@ -1,10 +1,6 @@
 from rest_framework import serializers
 from .models import Cliente, Pyme, Sucursal, Asistencia_Pyme, Descuento
 
-class ClienteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cliente
-        fields = ['rut', 'nombre', 'apellido', 'correo', 'telefono', 'estado', 'password',]
 
 class PymeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,4 +20,11 @@ class DescuentoSerializer(serializers.ModelSerializer):
 class AsistenciaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Asistencia_Pyme
-        fields = '__all__'
+        fields = ['url','rut_cliente', 'pyme', 'monto_ahorrado', 'fecha']
+
+
+class ClienteSerializer(serializers.HyperlinkedModelSerializer):
+    asistencias = AsistenciaSerializer(many=True, read_only= True)
+    class Meta:
+        model = Cliente
+        fields = ['url','correo', 'rut', 'nombre', 'apellido', 'telefono', 'estado', 'password','asistencias']
