@@ -1,32 +1,38 @@
 from rest_framework import serializers
-from .models import Cliente, Pyme, Sucursal, Asistencia_Pyme, Descuento, Redes_sociale, informacion_pyme
+from drf_extra_fields.fields import Base64ImageField
+from .models import Cliente, Pyme, Sucursal, Historial_asistencia, Descuento, Redes_sociale, Informacion_pyme, Imagenes_descuento
+import bcrypt
 
-
-class SucursalSerializer(serializers.ModelSerializer):
+class SucursalSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Sucursal
-        fields = ['url', 'nombre', 'pyme']
+        fields = ['id','url', 'nombre', 'direccion', 'pyme']
 
-class DescuentoSerializer(serializers.ModelSerializer):
+class ImagenesDescuentoSerializer(serializers.HyperlinkedModelSerializer):
+    imagen = Base64ImageField(required = False)
+    class Meta:
+        model = Imagenes_descuento
+        fields = ['id','url', 'imagen', 'descuento']
+
+class DescuentoSerializer(serializers.HyperlinkedModelSerializer):
+    imagenes = ImagenesDescuentoSerializer(many=True, read_only=True)
     class Meta:
         model = Descuento
-        fields = ['url','nombre', 'descripcion', 'porcentaje','pyme']
+        fields = ['url','nombre', 'descripcion', 'porcentaje','pyme', 'imagenes']
 
-class AsistenciaSerializer(serializers.ModelSerializer):
+class AsistenciaSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Asistencia_Pyme
-        fields = ['url','rut_cliente', 'pyme', 'monto_ahorrado', 'fecha']
+        model = Historial_asistencia
+        fields = ['url','rut_cliente', 'pyme', 'monto_ahorrado', 'fecha', 'descuento']
 
-
-class RedesSocialesSerializer(serializers.ModelSerializer):
+class RedesSocialesSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Redes_sociale
         fields = ['url','pyme', 'red_social', 'link']
 
-
-class informacionPymeSerializer(serializers.ModelSerializer):
+class informacionPymeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = informacion_pyme
+        model = Informacion_pyme
         fields = ['descripcion', 'horarios', 'direccion', 'pyme']
 
 class PymeSerializer(serializers.HyperlinkedModelSerializer):
@@ -34,12 +40,50 @@ class PymeSerializer(serializers.HyperlinkedModelSerializer):
     descuentos = DescuentoSerializer(many=True, read_only=True)
     redes_sociales = RedesSocialesSerializer(many=True, read_only=True)
     informacion = informacionPymeSerializer(read_only=True)
+    asistentes = AsistenciaSerializer(many=True, read_only=True)
+    imagen = Base64ImageField(required = False)
     class Meta:
         model = Pyme
-        fields = ['url', 'rut', 'nombre', 'correo', 'telefono', 'password','descuentos', 'sucursales','redes_sociales', 'informacion']
+        fields = ['url', 'rut', 'nombre', 'imagen','correo', 'telefono', 'estado', 'password','descuentos', 'sucursales','redes_sociales', 'informacion','asistentes', ]
+    def to_representation(self, instance):
+        # Sobrescribe el método para encriptar la contraseña en respuestas GET
+        data = super(PymeSerializer, self).to_representation(instance)
+        if 'password' in data:
+            password = data['password']
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            data['password'] = hashed_password.decode('utf-8')
+        return data
+
+class AllPymeSerializer(serializers.HyperlinkedModelSerializer):
+    sucursales = SucursalSerializer(many=True, read_only=True)
+    descuentos = DescuentoSerializer(many=True, read_only=True)
+    redes_sociales = RedesSocialesSerializer(many=True, read_only=True)
+    informacion = informacionPymeSerializer(read_only=True)
+    asistentes = AsistenciaSerializer(many=True, read_only=True)
+    class Meta:
+        model = Pyme
+        fields = ['url', 'rut', 'nombre', 'correo', 'telefono','descuentos', 'estado' 'sucursales','redes_sociales', 'informacion','asistentes', ]
 
 class ClienteSerializer(serializers.HyperlinkedModelSerializer):
+    imagen = Base64ImageField(required = False)
     asistencias = AsistenciaSerializer(many=True, read_only= True)
     class Meta:
         model = Cliente
-        fields = ['url','correo', 'rut', 'nombre', 'apellido', 'telefono', 'estado', 'password','asistencias']
+        fields = ['url', 'rut', 'nombre', 'apellido', 'correo','telefono', 'estado','imagen', 'password','asistencias']
+
+    def to_representation(self, instance):
+        # Sobrescribe el método para encriptar la contraseña en respuestas GET
+        data = super(ClienteSerializer, self).to_representation(instance)
+        if 'password' in data:
+            password = data['password']
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            data['password'] = hashed_password.decode('utf-8')
+        return data
+    
+
+
+class AllClienteSerializer(serializers.HyperlinkedModelSerializer):
+    asistencias = AsistenciaSerializer(many=True, read_only= True)
+    class Meta:
+        model = Cliente
+        fields = ['url', 'rut', 'nombre', 'apellido', 'correo','telefono','asistencias']
