@@ -39,13 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'corsheaders',
     'rest_api',
     'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -55,19 +54,19 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOW_METHODS = [
-    'GET',
-    'OPTIONS',
-    # Otros métodos que necesites permitir
-]
+# CORS_ALLOW_METHODS = [
+#     'GET',
+#     'OPTIONS',
+#     # Otros métodos que necesites permitir
+# ]
 
-CORS_ALLOW_HEADERS = [
-    'Content-Type',
-    'Accept',
-]
+# CORS_ALLOW_HEADERS = [
+#     'Content-Type',
+#     'Accept',
+# ]
 
 
 ROOT_URLCONF = 'redcc_backend.urls'
@@ -75,7 +74,7 @@ ROOT_URLCONF = 'redcc_backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'redcc_backend/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -90,6 +89,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'redcc_backend.wsgi.application'
 
+# print(os.path.join(BASE_DIR, 'redcc_backend\templatesss'))
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -103,16 +103,16 @@ WSGI_APPLICATION = 'redcc_backend.wsgi.application'
 # }
 
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "django_bd",
-        "USER": "django",
-        "PASSWORD": "",
-        "HOST": "127.0.0.1",
-        "PORT": "3306",
-    }
-}
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.mysql",
+#         "NAME": "django_bd",
+#         "USER": "django",
+#         "PASSWORD": "",
+#         "HOST": "127.0.0.1",
+#         "PORT": "3306",
+#     }
+# }
 
 
 # Password validation

@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
-from .serializer import PymeSerializer, SucursalSerializer, DescuentoSerializer, AsistenciaSerializer, informacionPymeSerializer, RedesSocialesSerializer, ImagenesDescuentoSerializer, AllPymeSerializer, AllClienteSerializer
-from .models import Cliente, Pyme, Sucursal, Descuento, Historial_asistencia, Redes_sociale, Informacion_pyme, Imagenes_descuento
+from .serializer import PymeSerializer, SucursalSerializer, ServicioSerializer, AsistenciaSerializer, informacionPymeSerializer, RedesSocialesSerializer, AllPymeSerializer, AllClienteSerializer
+from .models import Cliente, Pyme, Sucursal, Servicio, Historial_asistencia, Redes_sociale, Informacion_pyme
 from rest_framework.decorators import action, permission_classes, api_view
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
@@ -10,49 +10,49 @@ from rest_framework.parsers import JSONParser
 
 # ---- VIEWSET's PARA PYMES, SE NECESITA TOKEN PARA UTILIZAR
 
-@permission_classes((IsAuthenticated,))
+#@permission_classes((IsAuthenticated,))
 class PymeViewSet(viewsets.ModelViewSet):
     queryset = Pyme.objects.all()
     serializer_class = PymeSerializer
 
-@permission_classes((IsAuthenticated,))
+#@permission_classes((IsAuthenticated,))
 class SucursalViewSet(viewsets.ModelViewSet):
     queryset = Sucursal.objects.all()
     serializer_class = SucursalSerializer
 
-@permission_classes((IsAuthenticated,))
-class DescuentoViewSet(viewsets.ModelViewSet):
-    queryset = Descuento.objects.all()
-    serializer_class = DescuentoSerializer
+#@permission_classes((IsAuthenticated,))
+class ServicioViewSet(viewsets.ModelViewSet):
+    queryset = Servicio.objects.all()
+    serializer_class = ServicioSerializer
 
-@permission_classes((IsAuthenticated,))
+#@permission_classes((IsAuthenticated,))
 class AsistenciaViewSet(viewsets.ModelViewSet):
     queryset = Historial_asistencia.objects.all()
     serializer_class = AsistenciaSerializer
 
-@permission_classes((IsAuthenticated,))
+#@permission_classes((IsAuthenticated,))
 class RedesSocialesViewSet(viewsets.ModelViewSet):
     queryset = Redes_sociale.objects.all()
     serializer_class = RedesSocialesSerializer
 
-@permission_classes((IsAuthenticated,))
+#@permission_classes((IsAuthenticated,))
 class InfoPymesViewSet(viewsets.ModelViewSet):
     queryset = Informacion_pyme.objects.all()
     serializer_class = informacionPymeSerializer
 
-@permission_classes((IsAuthenticated,))
-class ImgDescuentoViewSet(viewsets.ModelViewSet):
-    queryset = Imagenes_descuento.objects.all()
-    serializer_class = ImagenesDescuentoSerializer
+#@permission_classes((IsAuthenticated,))
+# class ImgDescuentoViewSet(viewsets.ModelViewSet):
+#     queryset = Imagenes_descuento.objects.all()
+#     serializer_class = ImagenesDescuentoSerializer
 
-@permission_classes((IsAuthenticated,))
+#@permission_classes((IsAuthenticated,))
 @api_view(['GET'])
 def getPymes(request):
     pymes = Pyme.objects.all()
     serializer = AllPymeSerializer(pymes, many=True, context={'request': request})
     return Response(serializer.data)
 
-@permission_classes((IsAuthenticated,))
+#@permission_classes((IsAuthenticated,))
 @api_view(['POST'])
 def createPyme(request):
     data = JSONParser().parse(request)
@@ -63,7 +63,7 @@ def createPyme(request):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@permission_classes((IsAuthenticated,))
+#@permission_classes((IsAuthenticated,))
 @api_view(['POST'])
 def loginPyme(request):
     pyme = request.data.get('user')

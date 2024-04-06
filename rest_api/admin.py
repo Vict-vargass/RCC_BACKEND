@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Cliente, Pyme, Sucursal, Historial_asistencia, Descuento, Informacion_pyme, Redes_sociale, Administrador
+from .models import Cliente, Pyme, Sucursal, Historial_asistencia, Servicio, Informacion_pyme, Redes_sociale, Administrador
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
@@ -19,6 +19,6 @@ admin.site.register(Cliente)
 admin.site.register(Pyme)
 admin.site.register(Sucursal)
 admin.site.register(Historial_asistencia)
-admin.site.register(Descuento)
+admin.site.register(Servicio)
 admin.site.register(Redes_sociale)
 admin.site.register(Informacion_pyme)

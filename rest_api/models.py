@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth.hashers import make_password
+from django.dispatch import receiver
+from django.db.models.signals import post_save, pre_save, m2m_changed
 
 class AdministradorManager(BaseUserManager):
     def create_user(self, username, correo, password, **extra_fields):
@@ -41,14 +43,13 @@ class Cliente(models.Model):
     correo = models.EmailField(max_length=100, null= False, unique=True)
     nombre = models.CharField(max_length=20, null=False)
     apellido = models.CharField(max_length=20, null=False)
-    telefono= models.CharField(max_length=10, null=False)
+    telefono= models.CharField(max_length=12, null=False)
     password= models.CharField(max_length=15, null=False)
     imagen = models.ImageField(blank=True, null=True, upload_to='RCC_BACKEND/static/cliente/')
     class Estados(models.TextChoices):
         Activo = "Activo"
         Inactivo = "Inactivo"
     estado = models.CharField(max_length=25, choices=Estados.choices)
-    
 
     def __str__(self):
         return'{}'.format(self.rut)    
@@ -59,16 +60,13 @@ class Pyme(models.Model):
     nombre = models.CharField(max_length=50, null=False)
     password= models.CharField(max_length=15, null=False)
     correo =models.CharField(max_length=30, null= False)
-    telefono= models.CharField(max_length=10, null=True)
+    telefono= models.CharField(max_length=12, null=True)
     
     class Estados(models.TextChoices):
         Activo = "Activo"
         Inactivo = "Inactivo"
     
     estado = models.CharField(max_length=25, choices=Estados.choices)
-
-
-
     imagen = models.ImageField(blank=True, null=True, upload_to='RCC_BACKEND/static/pyme/')
 
     class Estados(models.TextChoices):
@@ -86,26 +84,27 @@ class Sucursal(models.Model):
     def __str__(self):
         return'{} {}'.format(self.pyme, self.nombre)
 
-class Descuento(models.Model):
+class Servicio(models.Model):
     nombre = models.CharField(max_length=50, null=False)
     descripcion = models.CharField(max_length=1000, null=False)
     porcentaje = models.FloatField(null=False)
+    valor = models.IntegerField(null= False)
     pyme = models.ForeignKey('Pyme', on_delete=models.CASCADE, db_column='pyme', related_name='descuentos')
     def __str__(self):
         return'{} {}'.format(self.pyme, self.nombre)
 
-class Imagenes_descuento(models.Model):
-    imagen = models.ImageField(blank=True, null=True, upload_to='RCC_BACKEND/static/descuento/')
-    descuento = models.ForeignKey(Descuento, on_delete=models.CASCADE, db_column='desc', related_name="imagenes")
-    def __str__(self):
-        return'{} {}'.format()
+# class Imagenes_descuento(models.Model):
+#     imagen = models.ImageField(blank=True, null=True, upload_to='RCC_BACKEND/static/descuento/')
+#     descuento = models.ForeignKey(Descuento, on_delete=models.CASCADE, db_column='desc', related_name="imagenes")
+#     def __str__(self):
+#         return'{}'.format(self.descuento)
 
 class Historial_asistencia (models.Model):
     rut_cliente = models.ForeignKey('Cliente', on_delete=models.CASCADE, db_column='rut_cliente', related_name='asistencias')
     pyme = models.ForeignKey('Pyme', on_delete=models.CASCADE, db_column='pyme', related_name='asistentes')
-    monto_ahorrado = models.IntegerField( null=False)
+    monto_ahorrado = models.IntegerField( null=True)
     fecha = models.DateField(null=False)
-    descuento = models.ManyToManyField(Descuento)
+    descuento = models.ManyToManyField(Servicio)
     def __str__(self):
         return'{} {}'.format(self.rut_cliente, self.pyme)
     class Meta:
@@ -121,7 +120,7 @@ class Redes_sociale (models.Model):
     red_social = models.CharField(max_length=25, choices=redes.choices)
     link = models.CharField(null=False, max_length=2000)
     def __str__(self):
-        return'{} {}'.format(self.pyme)
+        return'{}'.format(self.pyme)
 
 
 class Informacion_pyme (models.Model):
@@ -130,4 +129,40 @@ class Informacion_pyme (models.Model):
     pyme = models.OneToOneField(Pyme, on_delete=models.CASCADE, db_column='pyme', related_name='informacion')
     direccion = models.CharField(max_length=50, null=False)
     def __str__(self):
-        return'{} {}'.format(self.pyme)
+        return'{}'.format(self.pyme)
+    
+
+class Redpoints_Ahorro (models.Model):
+    monto_ahorrado = models.IntegerField(null=False)
+    redpoints = models.IntegerField(null=True)
+    cliente = models.OneToOneField(Cliente, on_delete=models.CASCADE, db_column='cliente', related_name='redpoints_ahorro')
+    def __str__(self):
+        return'{}'.format(self.cliente)
+    
+
+@receiver(post_save, sender=Historial_asistencia)
+def actualizar_redpoints_ahorro(sender, instance, created, **kwargs):
+
+    try:
+        rp = Redpoints_Ahorro.objects.get(cliente=instance.rut_cliente)
+        rp.monto_ahorrado += instance.monto_ahorrado 
+        rp.redpoints += instance.monto_ahorrado * 0.1
+        rp.save()
+            
+    except:
+        Redpoints_Ahorro.objects.update_or_create(cliente=instance.rut_cliente, 
+                                                  defaults={'monto_ahorrado': instance.monto_ahorrado, 'redpoints': instance.monto_ahorrado * 0.1})
+
+
+
+@receiver(m2m_changed, sender=Historial_asistencia.descuento.through)
+def actualizar_monto_ahorrado(sender, instance, action, **kwargs):
+    if action == 'post_add' or action == 'post_remove':
+        # Recalcular el monto ahorrado
+        monto_ahorrado = 0
+        for servicio in instance.descuento.all():
+            monto_ahorrado += servicio.valor * servicio.porcentaje / 100
+        
+        # Actualizar el monto ahorrado en la instancia de Historial_asistencia
+        instance.monto_ahorrado = monto_ahorrado
+        instance.save()
