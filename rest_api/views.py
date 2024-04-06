@@ -54,8 +54,10 @@ def loginUser(request):
     user = request.data.get('user')
     password = request.data.get('password')
     try:
-        usuario = Cliente.objects.get(rut=user)
-        if usuario.is_active:
+
+        usuario = Cliente.objects.get(correo=user)
+
+        if usuario.estado:
             if usuario.password == password:
                 return Response({'status': True, "hasAccess": True}, status= status.HTTP_202_ACCEPTED)
             else:

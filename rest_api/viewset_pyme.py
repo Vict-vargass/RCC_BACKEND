@@ -66,13 +66,12 @@ def createPyme(request):
 #@permission_classes((IsAuthenticated,))
 @api_view(['POST'])
 def loginPyme(request):
-    pyme = request.data.get('user')
+    rutPyme = request.data.get('user')
     password = request.data.get('password')
     try:
-        pyme = Pyme.objects.get(rut=pyme)
+        pyme = Pyme.objects.get(rut=rutPyme)
         if pyme.password == password:
-            token, created = Token.objects.get_or_create(user=pyme)
-            return Response({'estado': True, "hasAccess": True, 'Token': token.key}, status= status.HTTP_202_ACCEPTED)
+            return Response({'estado': True, "hasAccess": True, 'rut': pyme.rut}, status= status.HTTP_202_ACCEPTED)
         else:
             return Response({'hasAccess': True, 'pass': False}, status= status.HTTP_401_UNAUTHORIZED)
     except:

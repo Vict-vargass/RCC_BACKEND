@@ -29,6 +29,13 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'soporte.redconvenioschile@gmail.com'
+EMAIL_HOST_PASSWORD = 'voic rstu dsbt foqv'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -38,13 +45,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'rest_api',
     'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = [
-    
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -54,8 +62,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 # CORS_ALLOW_METHODS = [
 #     'GET',
@@ -103,16 +111,16 @@ WSGI_APPLICATION = 'redcc_backend.wsgi.application'
 # }
 
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.mysql",
-#         "NAME": "django_bd",
-#         "USER": "django",
-#         "PASSWORD": "",
-#         "HOST": "127.0.0.1",
-#         "PORT": "3306",
-#     }
-# }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "django_bd",
+        "USER": "django",
+        "PASSWORD": "",
+        "HOST": "127.0.0.1",
+        "PORT": "3306",
+    }
+}
 
 
 # Password validation

@@ -69,10 +69,6 @@ class Pyme(models.Model):
     estado = models.CharField(max_length=25, choices=Estados.choices)
     imagen = models.ImageField(blank=True, null=True, upload_to='RCC_BACKEND/static/pyme/')
 
-    class Estados(models.TextChoices):
-        Activo = True
-        Inactivo = False
-    estado = models.BooleanField(max_length=20, choices=Estados.choices, default=True)
 
     def __str__(self):
         return'{} {}'.format(self.nombre, self.rut)
@@ -86,7 +82,6 @@ class Sucursal(models.Model):
 
 class Servicio(models.Model):
     nombre = models.CharField(max_length=50, null=False)
-    descripcion = models.CharField(max_length=1000, null=False)
     porcentaje = models.FloatField(null=False)
     valor = models.IntegerField(null= False)
     pyme = models.ForeignKey('Pyme', on_delete=models.CASCADE, db_column='pyme', related_name='descuentos')
@@ -152,6 +147,17 @@ def actualizar_redpoints_ahorro(sender, instance, created, **kwargs):
     except:
         Redpoints_Ahorro.objects.update_or_create(cliente=instance.rut_cliente, 
                                                   defaults={'monto_ahorrado': instance.monto_ahorrado, 'redpoints': instance.monto_ahorrado * 0.1})
+
+
+
+@receiver(post_save, sender=Cliente)
+def crear_monto_ahorro(sender, instance, created, **kwargs):
+    if created:
+        try:
+            rp = Redpoints_Ahorro.objects.create(monto_ahorrado=0, redpoints=0, cliente=instance)
+            rp.save()
+        except Exception as e:
+            print("Error al crear Redpoints_Ahorro:", e)
 
 
 

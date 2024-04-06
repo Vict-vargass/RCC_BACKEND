@@ -18,7 +18,7 @@ class ServicioSerializer(serializers.HyperlinkedModelSerializer):
     # imagenes = ImagenesDescuentoSerializer(many=True, read_only=True)
     class Meta:
         model = Servicio
-        fields = ['url','nombre', 'descripcion', 'porcentaje', 'valor', 'pyme']
+        fields = ['url','nombre','valor', 'porcentaje', 'pyme']
 
 
 class DescuentoResumenSerializer(serializers.HyperlinkedModelSerializer):
